@@ -5,7 +5,7 @@ import {
   updateProduct, 
   deleteProduct 
 } from "../controllers/productController.js";
-import { validateProduct } from "../middleware/validateProduct.js";
+import { validateProduct } from "../middleware/validate.js";
 const router = express.Router();
 router.get("/", getProducts);
 router.post("/", validateProduct, createProduct);
