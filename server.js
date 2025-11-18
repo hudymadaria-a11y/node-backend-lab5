@@ -5,9 +5,7 @@ import dotenv from "dotenv";
 
 dotenv.config();
 const app = express();
-
-// ЦІ ДВА РЯДКИ — ОБОВ’ЯЗКОВІ ДЛЯ ЗБЕРЕЖЕННЯ ПРОДУКТІВ!
-app.use(express.json());        // ← ОТ ЦЕЙ РЯДОК ТИ ЗАБУЛА!
+app.use(express.json());    
 app.use(cors());
 
 // Підключення до MongoDB
