@@ -4,28 +4,47 @@ import cors from "cors";
 import dotenv from "dotenv";
 
 dotenv.config();
+
 const app = express();
-app.use(express.json());    
+
+app.use(express.json());
 app.use(cors());
 
-// Підключення до MongoDB
+// Підключення до MongoDB Atlas
 mongoose.connect(process.env.MONGO_URI)
-  .then(() => console.log("MongoDB підключено"))
-  .catch(err => console.error("MongoDB помилка:", err));
+  .then(() => console.log("MongoDB успішно підключено"))
+  .catch(err => {
+    console.error("Помилка MongoDB:", err);
+    process.exit(1);
+  });
 
-// Модель
-const Product = mongoose.model("Product", new mongoose.Schema({
+// Модель продукту
+const productSchema = new mongoose.Schema({
   name: String,
   price: Number,
   description: String
-}));
-
-// Роути
-app.get("/products", async (req, res) => {
-  const products = await Product.find();
-  res.json(products);
 });
 
+const Product = mongoose.model("Product", productSchema);
+
+// === РОУТИ ===
+
+// Головна сторінка
+app.get("/", (req, res) => {
+  res.send("<h1>Лабораторна робота 5 — працює!</h1><p><a href='/products'>Переглянути продукти</a></p>");
+});
+
+// Отримати всі продукти
+app.get("/products", async (req, res) => {
+  try {
+    const products = await Product.find();
+    res.json(products);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Додати продукт
 app.post("/products", async (req, res) => {
   try {
     const product = new Product(req.body);
@@ -36,18 +55,29 @@ app.post("/products", async (req, res) => {
   }
 });
 
+// Оновити продукт
 app.put("/products/:id", async (req, res) => {
-  const updated = await Product.findByIdAndUpdate(req.params.id, req.body, { new: true });
-  res.json(updated);
+  try {
+    const updated = await Product.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    res.json(updated);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
 });
 
+// Видалити продукт
 app.delete("/products/:id", async (req, res) => {
-  await Product.findByIdAndDelete(req.params.id);
-  res.json({ message: "Видалено" });
+  try {
+    await Product.findByIdAndDelete(req.params.id);
+    res.json({ message: "Продукт видалено" });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
+// Запуск сервера
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  {
-  console.log(`Сервер працює: https://node-backend-lab5.onrender.com`);
+  console.log(`Сервер запущено на порту ${PORT}`);
+  console.log(`Продукти: https://node-backend-lab5.onrender.com/products`);
 });
